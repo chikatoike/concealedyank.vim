@@ -7,7 +7,9 @@ let s:save_cpo = &cpo
 set cpo&vim
 
 if has('conceal')
-  nnoremap <silent> <Plug>(operator-concealedyank) y:call <SID>concealedyank()<CR>
+  " nnoremap <silent> <Plug>(operator-concealedyank) y:call <SID>concealedyank()<CR>
+  " TODO implement operator
+  nnoremap <silent> <Plug>(operator-concealedyank) y
   xnoremap <silent> <Plug>(operator-concealedyank) y:call <SID>concealedyank()<CR>
 
   function! s:concealedyank()
