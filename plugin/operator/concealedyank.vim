@@ -14,16 +14,18 @@ if has('conceal')
 
   function! s:concealedyank()
     if &concealcursor !~# 'v'
-      " Only yank if &concealcursor isn't contains visual mode.
+      " if &concealcursor isn't contains "v" (visual mode), yank as normal.
       return
     endif
 
     let type = getregtype(v:register)
 
     let startline = line("'[")
-    let startcol = col("'[")
     let lastline = line("']")
-    let lastcol = col("']")
+    " col is zero based.
+    let startcol = col("'[") - 1
+    let lastcol = col("']") - 1
+
     let text = []
 
     if startline == lastline
@@ -34,9 +36,9 @@ if has('conceal')
       " multi line
       call add(text, s:getconcealedline(startline, startcol, -1))
       for lnum in range(startline + 1, lastline - 1)
-        call add(text, s:getconcealedline(lnum, 1, -1))
+        call add(text, s:getconcealedline(lnum, 0, -1))
       endfor
-      call add(text, s:getconcealedline(lastline, 1, lastcol))
+      call add(text, s:getconcealedline(lastline, 0, lastcol))
 
     else
       " blockwise
@@ -49,18 +51,27 @@ if has('conceal')
   endfunction
 
   function! s:getconcealedline(lnum, startcol, endcol)
-    let chars = getline(a:lnum)
-    let endcol = a:endcol >= 1 ? min([a:endcol, len(chars)]) : len(chars)
+    let line = getline(a:lnum)
+    let index = a:startcol
+    let endcol = a:endcol >= 0 ? min([a:endcol, strlen(line)]) : strlen(line)
+
+    let region = -1
     let ret = ''
 
-    for col in range(a:startcol, endcol)
-      let concealed = synconcealed(a:lnum, col)
+    while index <= endcol
+      let concealed = synconcealed(a:lnum, index + 1)
       if concealed[0] != 0
-        let ret .= concealed[1]
+        if region != concealed[2]
+          let region = concealed[2]
+          let ret .= concealed[1]
+        endif
       else
-        let ret .= chars[col - 1]
+        let ret .= line[index]
       endif
-    endfor
+
+      " get next char index.
+      let index += 1
+    endwhile
 
     return ret
   endfunction
