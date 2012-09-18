@@ -29,6 +29,7 @@ if has('conceal')
     if startline == lastline
       " single line
       call add(text, s:getconcealedline(startline, startcol, lastcol))
+
     elseif type[0] !=# "\<C-v>"
       " multi line
       call add(text, s:getconcealedline(startline, startcol, -1))
@@ -36,6 +37,7 @@ if has('conceal')
         call add(text, s:getconcealedline(lnum, 1, -1))
       endfor
       call add(text, s:getconcealedline(lastline, 1, lastcol))
+
     else
       " blockwise
       for lnum in range(startline, lastline)
@@ -47,7 +49,7 @@ if has('conceal')
   endfunction
 
   function! s:getconcealedline(lnum, startcol, endcol)
-    let chars = split(getline(a:lnum), '\zs')
+    let chars = getline(a:lnum)
     let endcol = a:endcol >= 1 ? min([a:endcol, len(chars)]) : len(chars)
     let ret = ''
 
